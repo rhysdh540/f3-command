@@ -1,5 +1,3 @@
-# mod template
+# F3 Command
 
-a simple template for developing minecraft mods
-
-comes with mixins, jar merging, and github actions
+simple minecraft mod to emulate the F3+[key] keybinds with commands
