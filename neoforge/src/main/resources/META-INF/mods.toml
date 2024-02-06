@@ -14,8 +14,15 @@ F3 but it's a command
 '''
 
 [[dependencies.f3]]
+modId = "neoforge"
+type = "required"
+versionRange = "[1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.f3]]
 modId = "minecraft"
-mandatory = true
+type = "required"
 versionRange = "[${minecraft},)"
 ordering = "NONE"
 side = "CLIENT"

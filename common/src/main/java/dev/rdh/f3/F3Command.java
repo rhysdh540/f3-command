@@ -55,14 +55,14 @@ public class F3Command {
 						.executes(context -> {
 							boolean hitboxes = mc.getEntityRenderDispatcher().shouldRenderHitBoxes();
 							mc.getEntityRenderDispatcher().setRenderHitBoxes(!hitboxes);
-							return sendMessage(hitboxes ? "debug.show_hitboxes.on" : "debug.show_hitboxes.off");
+							return sendMessage(hitboxes ? "debug.show_hitboxes.off" : "debug.show_hitboxes.on");
 						})
 				)
 				.then(literal("tooltips")
 						.executes(context -> {
 							mc.options.advancedItemTooltips = !mc.options.advancedItemTooltips;
 							mc.options.save();
-							return sendMessage(mc.options.advancedItemTooltips ? "debug.advanced_tooltips.off" : "debug.advanced_tooltips.on");
+							return sendMessage(mc.options.advancedItemTooltips ? "debug.advanced_tooltips.on" : "debug.advanced_tooltips.off");
 						})
 				)
 				.then(literal("pauseOnLostFocus")

@@ -42,7 +42,7 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://maven.fabricmc.net")
-        maven("https://maven.minecraftforge.net")
+        maven("https://maven.neoforged.net")
         maven("https://maven.architectury.dev")
         maven("https://maven.quiltmc.org/repository/release")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
@@ -98,10 +98,7 @@ subprojects {
     tasks.processResources {
         val props = mapOf(
                 "version" to version,
-                "minecraft" to "minecraft_version"(),
-                "fabric" to "fabric_version"(),
-                "fabric_api" to "fabric_api_version"(),
-                "forge" to "forge_version"().split(".")[0],
+                "minecraft" to "minecraft_dependency_version"(),
         )
 
         inputs.properties(props)
@@ -126,7 +123,6 @@ tasks.shadowJar {
     archiveBaseName.set("archives_base_name"())
     archiveClassifier.set("")
     archiveVersion.set("modVersion"())
-    archiveExtension.set("jar")
 
     doLast {
         val jar = archiveFile.get().asFile
@@ -144,7 +140,7 @@ tasks.shadowJar {
         JarOutputStream(jar.outputStream()).use { out ->
             out.setLevel(Deflater.BEST_COMPRESSION)
             contents.forEach { var (name, bytes) = it
-                if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
+                if (name.endsWith(".json") || name.endsWith(".mcmeta")) {
                     bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
                 }
 
