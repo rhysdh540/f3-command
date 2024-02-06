@@ -5,6 +5,7 @@ import net.fabricmc.loom.configuration.ide.RunConfigSettings;
 
 import net.fabricmc.loom.task.RemapJarTask;
 
+import net.fabricmc.loom.task.RemapSourcesJarTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -73,7 +74,8 @@ public class PlatformPlugin implements Plugin<Project> {
 			task.exclude("architectury.common.json");
 			task.exclude("**/PlatformMethods.class");
 			task.setConfigurations(List.of(shadowCommon, project.getConfigurations().getByName("shade")));
-			task.getArchiveClassifier().set("shadow-" + project.getName());
+			task.getArchiveClassifier().set("shadow-" + project.getName() + "-dev");
+			task.getDestinationDirectory().set(project.file("build/devlibs"));
 
 			task.relocate("dev.rdh.f3", "dev.rdh.f3." + project.getName().toLowerCase());
 		});
@@ -83,17 +85,17 @@ public class PlatformPlugin implements Plugin<Project> {
 		tasks.named("remapJar", RemapJarTask.class).configure(task -> {
 			task.getInputFile().set(shadowJar.getArchiveFile());
 			task.dependsOn(shadowJar);
-			task.getArchiveClassifier().set(project.getName());
+			task.getArchiveClassifier().set(project.getName().toLowerCase());
 		});
 
 		tasks.named("jar", Jar.class, task ->
-				task.getArchiveClassifier().set("dev-" + project.getName()));
+				task.getArchiveClassifier().set("dev-" + project.getName().toLowerCase()));
 
 		tasks.named("sourcesJar", Jar.class, task -> {
 			Jar commonSources = rootProject.project(":common").getTasks().named("sourcesJar", Jar.class).get();
 			task.dependsOn(commonSources);
-			task.from(commonSources.getArchiveFile().map(zipTree -> zipTree));
-			task.getArchiveClassifier().set("sources-" + project.getName());
+			task.from(commonSources.getArchiveFile().map(project::zipTree));
+			task.getArchiveClassifier().set("sources-" + project.getName().toLowerCase() + "-dev");
 		});
 
 		project.getComponents().named("java", softwareComponent -> {

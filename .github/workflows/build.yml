@@ -44,5 +44,5 @@ jobs:
       - name: upload merged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts-merged
+          name: f3-artifacts-merged
           path: build/libs/*.jar

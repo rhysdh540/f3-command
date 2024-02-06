@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.architectury.plugin.ArchitectPluginExtension
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -72,8 +73,8 @@ tasks.clean {
     delete(".architectury-transformer")
 }
 
-tasks.jar {
-    enabled = false
+listOf("jar", "sourcesJar").forEach {
+    tasks[it].enabled = false
 }
 
 subprojects {
@@ -109,10 +110,6 @@ subprojects {
     }
 }
 
-tasks.assemble {
-    dependsOn("shadowJar")
-}
-
 tasks.shadowJar {
     subprojects.forEach {
         if (it != project(":common")) {
@@ -145,15 +142,12 @@ tasks.shadowJar {
                 }
 
                 if (name.endsWith(".class")) {
-                    val reader = ClassReader(bytes)
                     val node = ClassNode()
-                    reader.accept(node, 0)
+                    ClassReader(bytes).accept(node, 0)
 
                     node.methods.forEach { method ->
                         method.localVariables?.clear()
-                    }
-                    if ("strip_source_files"().toBoolean()) {
-                        node.sourceFile = null
+                        method.parameters?.clear()
                     }
 
                     val writer = ClassWriter(0)
@@ -169,6 +163,10 @@ tasks.shadowJar {
             out.close()
         }
     }
+}
+
+tasks.assemble {
+    dependsOn("shadowJar")
 }
 
 fun setup() {
