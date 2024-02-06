@@ -62,7 +62,7 @@ public class F3Command {
 						.executes(context -> {
 							mc.options.advancedItemTooltips = !mc.options.advancedItemTooltips;
 							mc.options.save();
-							return sendMessage(mc.options.advancedItemTooltips ? "debug.advanced_tooltips.on" : "debug.advanced_tooltips.off");
+							return sendMessage(mc.options.advancedItemTooltips ? "debug.advanced_tooltips.off" : "debug.advanced_tooltips.on");
 						})
 				)
 				.then(literal("pauseOnLostFocus")
