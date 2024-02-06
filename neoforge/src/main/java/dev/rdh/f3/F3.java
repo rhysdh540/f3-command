@@ -5,7 +5,7 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.common.Mod;
 
-@Mod("f3")
+@Mod(F3Command.ID)
 public class F3 {
 	public F3() {
 		NeoForge.EVENT_BUS.addListener(this::onCommandRegister);

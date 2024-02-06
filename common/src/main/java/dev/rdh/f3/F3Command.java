@@ -14,11 +14,12 @@ import net.minecraft.network.chat.Component;
 
 import java.nio.file.Path;
 
-public class F3Command {
+public final class F3Command {
+	public static final String ID = "f3";
 	private static final Minecraft mc = Minecraft.getInstance();
 
 	public static void register(CommandDispatcher<SharedSuggestionProvider> dispatcher) {
-		LiteralArgumentBuilder<SharedSuggestionProvider> f3 = literal("f3")
+		LiteralArgumentBuilder<SharedSuggestionProvider> f3 = literal(ID)
 				.executes(context -> {
 					mc.gui.getDebugOverlay().toggleOverlay();
 					return 1;
@@ -112,21 +113,13 @@ public class F3Command {
 				)
 		);
 
-		LiteralCommandNode<SharedSuggestionProvider> f3Node = dispatcher.register(f3);
-		dispatcher.register(literal("f3").redirect(f3Node));
-	}
-
-	private static int sendMessage(ChatFormatting formatting, Component message) {
-		mc.gui.getChat().addMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(formatting, ChatFormatting.BOLD)).append(CommonComponents.SPACE).append(message));
-		return 1;
-	}
-
-	private static int sendMessage(Component message) {
-		return sendMessage(ChatFormatting.YELLOW, message);
+		dispatcher.register(literal(ID).redirect(dispatcher.register(f3)));
 	}
 
 	private static int sendMessage(String message, Object... args) {
-		return sendMessage(Component.translatable(message, args));
+		mc.gui.getChat().addMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+				.append(CommonComponents.SPACE).append(Component.translatable(message, args)));
+		return 1;
 	}
 
 	private static LiteralArgumentBuilder<SharedSuggestionProvider> literal(String string) {

@@ -67,6 +67,7 @@ allprojects {
 
 extensions.getByType<ArchitectPluginExtension>().apply {
     minecraft = "minecraft_version"()
+    compileOnly()
 }
 
 tasks.clean {
@@ -107,6 +108,10 @@ subprojects {
         filesMatching(listOf("fabric.mod.json", "META-INF/mods.toml")) {
             expand(props)
         }
+    }
+
+    if(project != project(":common")) {
+        sourceSets["main"].resources.srcDirs(project(":common").sourceSets["main"].resources.srcDirs)
     }
 }
 

@@ -11,6 +11,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${"fabric_version"()}")
     modApi(fabricApi.module("fabric-command-api-v2", "fabric_api_version"() + "+" + "minecraft_version"()))
     modLocalRuntime("net.fabricmc.fabric-api:fabric-api-deprecated:${"fabric_api_version"()}+${"minecraft_version"()}")
+
+    modLocalRuntime("com.terraformersmc:modmenu:${"modmenu_version"()}")
 }
 
 tasks.shadowJar {

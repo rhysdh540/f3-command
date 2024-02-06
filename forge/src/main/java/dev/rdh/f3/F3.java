@@ -6,7 +6,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod("f3")
+@Mod(F3Command.ID)
 public class F3 {
 	public F3() {
 		MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
