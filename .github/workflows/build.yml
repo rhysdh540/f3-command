@@ -37,14 +37,12 @@ jobs:
       - name: upload non-merged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: artifacts
+          name: f3-artifacts
           path: |
-            forge/build/libs/*.jar
-            fabric/build/libs/*.jar
-            common/build/libs/*.jar
+            **/build/libs/*.jar
 
       - name: upload merged artifacts
         uses: actions/upload-artifact@v3
         with:
           name: artifacts-merged
-          path: build/libs/merged/*.jar
+          path: build/libs/*.jar
