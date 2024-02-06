@@ -74,7 +74,7 @@ tasks.clean {
 }
 
 listOf("jar", "sourcesJar").forEach {
-    tasks[it].enabled = false
+    tasks.findByName(it)?.enabled = false
 }
 
 subprojects {

@@ -90,12 +90,14 @@ public class PlatformPlugin implements Plugin<Project> {
 		tasks.named("jar", Jar.class, task ->
 				task.getArchiveClassifier().set("dev-" + project.getName().toLowerCase()));
 
-		tasks.named("sourcesJar", Jar.class, task -> {
-			Jar commonSources = rootProject.project(":common").getTasks().named("sourcesJar", Jar.class).get();
-			task.dependsOn(commonSources);
-			task.from(commonSources.getArchiveFile().map(project::zipTree));
-			task.getArchiveClassifier().set("sources-" + project.getName().toLowerCase() + "-dev");
-		});
+		if(tasks.findByName("sourcesJar") != null) {
+			tasks.named("sourcesJar", Jar.class, task -> {
+				Jar commonSources = rootProject.project(":common").getTasks().named("sourcesJar", Jar.class).get();
+				task.dependsOn(commonSources);
+				task.from(commonSources.getArchiveFile().map(project::zipTree));
+				task.getArchiveClassifier().set("sources-" + project.getName().toLowerCase() + "-dev");
+			});
+		}
 
 		project.getComponents().named("java", softwareComponent -> {
 			if(softwareComponent instanceof AdhocComponentWithVariants adhoc) {
