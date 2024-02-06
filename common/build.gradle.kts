@@ -17,7 +17,7 @@ dependencies {
 }
 
 tasks.processResources {
-    from(rootProject.file("LICENSE")) {
-        rename { "${it}_${"archives_base_name"()}" }
-    }
+//    from(rootProject.file("LICENSE")) {
+//        rename { "${it}_${"archives_base_name"()}" }
+//    }
 }

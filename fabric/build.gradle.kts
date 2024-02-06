@@ -9,9 +9,12 @@ operator fun String.invoke(): String {
 
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${"fabric_version"()}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${"fabric_api_version"()}+${"minecraft_version"()}")
-
+    modApi(fabricApi.module("fabric-command-api-v2", "fabric_api_version"() + "+" + "minecraft_version"()))
     modLocalRuntime("net.fabricmc.fabric-api:fabric-api-deprecated:${"fabric_api_version"()}+${"minecraft_version"()}")
+}
 
-    modImplementation("com.terraformersmc:modmenu:${"mod_menu_version"()}")
+tasks.shadowJar {
+    filesMatching("fabric.mod.json") {
+        file.readText().replace("dev.rdh.f3.F3", "dev.rdh.f3.fabric.F3").let { file.writeText(it) }
+    }
 }

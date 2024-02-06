@@ -74,6 +74,8 @@ public class PlatformPlugin implements Plugin<Project> {
 			task.exclude("**/PlatformMethods.class");
 			task.setConfigurations(List.of(shadowCommon, project.getConfigurations().getByName("shade")));
 			task.getArchiveClassifier().set("shadow-" + project.getName());
+
+			task.relocate("dev.rdh.f3", "dev.rdh.f3." + project.getName());
 		});
 
 		ShadowJar shadowJar = shadowJarProvider.get();

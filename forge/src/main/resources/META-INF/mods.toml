@@ -1,28 +1,28 @@
 modLoader = "javafml"
 loaderVersion = "[${forge},)"
 license = "GPL-3.0"
-issueTrackerURL = "https://invalid.change.me"
+issueTrackerURL = "https://github.com/rhysdh540/f3-command/issues"
 
 [[mods]]
-modId = "template"
+modId = "f3"
 version = "${version}"
-displayName = "template"
+displayName = "F3 Command"
 logoFile = "icon.png"
 authors = "rdh"
 description = '''
-Example mod description.
+F3 but it's a command
 '''
 
-[[dependencies.template]]
+[[dependencies.f3]]
 modId = "forge"
 mandatory = true
 versionRange = "[${forge},)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 
-[[dependencies.template]]
+[[dependencies.f3]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[${minecraft},)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"

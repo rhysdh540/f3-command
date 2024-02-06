@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "Mod Template"
+rootProject.name = "F3 Command"
 
 include("common")
 include("fabric")

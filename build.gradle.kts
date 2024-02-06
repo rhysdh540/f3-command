@@ -1,13 +1,20 @@
 import dev.architectury.plugin.ArchitectPluginExtension
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.tree.ClassNode
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
+import java.util.zip.Deflater
 
 plugins {
     java
     id("architectury-plugin") apply(false)
     id("dev.architectury.loom") apply(false)
-    id("com.github.johnrengelman.shadow") apply(false)
-
-    id("io.github.pacifistmc.forgix")
+    id("com.github.johnrengelman.shadow")
 }
 
 operator fun String.invoke(): String {
@@ -61,11 +68,11 @@ extensions.getByType<ArchitectPluginExtension>().apply {
     minecraft = "minecraft_version"()
 }
 
-tasks.clean.configure {
+tasks.clean {
     delete(".architectury-transformer")
 }
 
-tasks.jar.configure {
+tasks.jar {
     enabled = false
 }
 
@@ -83,7 +90,7 @@ subprojects {
         @Suppress("UnstableApiUsage")
         "mappings"(loom.layered {
             mappings("org.quiltmc:quilt-mappings:${"minecraft_version"()}+build.${"quilt_mappings_version"()}:intermediary-v2")
-            parchment("org.parchmentmc.data:parchment-${"minecraft_version"()}:${"parchment_version"()}@zip")
+            parchment("org.parchmentmc.data:parchment-${"parchment_minecraft_version"()}:${"parchment_version"()}@zip")
             officialMojangMappings { nameSyntheticMembers = false }
         })
     }
@@ -94,7 +101,7 @@ subprojects {
                 "minecraft" to "minecraft_version"(),
                 "fabric" to "fabric_version"(),
                 "fabric_api" to "fabric_api_version"(),
-                "forge" to "forge_version"().split("\\.")[0],
+                "forge" to "forge_version"().split(".")[0],
         )
 
         inputs.properties(props)
@@ -103,16 +110,73 @@ subprojects {
             expand(props)
         }
     }
-
-    tasks.getByName("remapJar").finalizedBy("mergeJars")
 }
 
-tasks.assemble.configure {
-    finalizedBy("mergeJars")
+tasks.assemble {
+    dependsOn("shadowJar")
+}
+
+tasks.shadowJar {
+    subprojects.forEach {
+        if (it != project(":common")) {
+            from(it.tasks.named("remapJar"))
+        }
+    }
+
+    archiveBaseName.set("archives_base_name"())
+    archiveClassifier.set("")
+    archiveVersion.set("modVersion"())
+    archiveExtension.set("jar")
+
+    doLast {
+        val jar = archiveFile.get().asFile
+        val contents = linkedMapOf<String, ByteArray>()
+        JarFile(jar).use {
+            it.entries().asIterator().forEach { entry ->
+                if (!entry.isDirectory) {
+                    contents[entry.name] = it.getInputStream(entry).readAllBytes()
+                }
+            }
+        }
+
+        jar.delete()
+
+        JarOutputStream(jar.outputStream()).use { out ->
+            out.setLevel(Deflater.BEST_COMPRESSION)
+            contents.forEach { var (name, bytes) = it
+                if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
+                    bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
+                }
+
+                if (name.endsWith(".class")) {
+                    val reader = ClassReader(bytes)
+                    val node = ClassNode()
+                    reader.accept(node, 0)
+
+                    node.methods.forEach { method ->
+                        method.localVariables?.clear()
+                    }
+                    if ("strip_source_files"().toBoolean()) {
+                        node.sourceFile = null
+                    }
+
+                    val writer = ClassWriter(0)
+                    node.accept(writer)
+                    bytes = writer.toByteArray()
+                }
+
+                out.putNextEntry(JarEntry(name))
+                out.write(bytes)
+                out.closeEntry()
+            }
+            out.finish()
+            out.close()
+        }
+    }
 }
 
 fun setup() {
-    println("Template Mod v${"mod_version"()}")
+    println("${project.name} v${"mod_version"()}")
     val buildNumber = System.getenv("GITHUB_RUN_NUMBER")
     if(buildNumber != null) {
         println("Build #$buildNumber")
