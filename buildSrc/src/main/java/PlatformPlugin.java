@@ -5,7 +5,6 @@ import net.fabricmc.loom.configuration.ide.RunConfigSettings;
 
 import net.fabricmc.loom.task.RemapJarTask;
 
-import net.fabricmc.loom.task.RemapSourcesJarTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;

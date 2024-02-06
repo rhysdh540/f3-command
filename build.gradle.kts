@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.architectury.plugin.ArchitectPluginExtension
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -38,12 +37,13 @@ allprojects {
         options.release.set(17)
     }
 
-    java.withSourcesJar()
+//    java.withSourcesJar()
 
     repositories {
         mavenCentral()
         maven("https://maven.fabricmc.net")
         maven("https://maven.neoforged.net")
+        maven("https://maven.minecraftforge.net")
         maven("https://maven.architectury.dev")
         maven("https://maven.quiltmc.org/repository/release")
         maven("https://oss.sonatype.org/content/repositories/snapshots")

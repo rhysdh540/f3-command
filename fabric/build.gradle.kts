@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 apply(plugin = "platform")
 
 architectury.fabric()
