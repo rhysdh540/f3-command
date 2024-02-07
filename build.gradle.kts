@@ -117,8 +117,8 @@ subprojects {
 
 tasks.shadowJar {
     subprojects.forEach {
-        if (it != project(":common")) {
-            from(it.tasks.named("remapJar"))
+        if(it != project(":common")) {
+            this.from(it.tasks.named("remapJar"))
         }
     }
 
@@ -131,7 +131,7 @@ tasks.shadowJar {
         val contents = linkedMapOf<String, ByteArray>()
         JarFile(jar).use {
             it.entries().asIterator().forEach { entry ->
-                if (!entry.isDirectory) {
+                if(!entry.isDirectory) {
                     contents[entry.name] = it.getInputStream(entry).readAllBytes()
                 }
             }
@@ -142,11 +142,11 @@ tasks.shadowJar {
         JarOutputStream(jar.outputStream()).use { out ->
             out.setLevel(Deflater.BEST_COMPRESSION)
             contents.forEach { var (name, bytes) = it
-                if (name.endsWith(".json") || name.endsWith(".mcmeta")) {
+                if(name.endsWith(".json") || name.endsWith(".mcmeta")) {
                     bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
                 }
 
-                if (name.endsWith(".class")) {
+                if(name.endsWith(".class")) {
                     val node = ClassNode()
                     ClassReader(bytes).accept(node, 0)
 
