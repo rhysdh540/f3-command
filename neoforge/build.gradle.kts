@@ -1,5 +1,3 @@
-apply(plugin = "platform")
-
 architectury.neoForge()
 
 operator fun String.invoke(): String {

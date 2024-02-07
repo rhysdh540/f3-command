@@ -2,6 +2,8 @@ import dev.architectury.plugin.ArchitectPluginExtension
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import net.fabricmc.loom.task.RemapJarTask
+import org.gradle.jvm.tasks.Jar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -12,9 +14,9 @@ import java.util.zip.Deflater
 
 plugins {
     java
-    id("architectury-plugin") apply(false)
-    id("dev.architectury.loom") apply(false)
-    id("com.github.johnrengelman.shadow")
+    id("architectury-plugin") version("3.4.151") apply(false)
+    id("dev.architectury.loom") version("1.4.380") apply(false)
+    id("com.github.johnrengelman.shadow") version("8.1.1")
 }
 
 operator fun String.invoke(): String {
@@ -110,9 +112,70 @@ subprojects {
         }
     }
 
-    if(project != project(":common")) {
-        sourceSets["main"].resources.srcDirs(project(":common").sourceSets["main"].resources.srcDirs)
+    if (project == project(":common")) {
+        return@subprojects
     }
+
+    //region Platform Setup
+    sourceSets["main"].resources.srcDirs(project(":common").sourceSets["main"].resources.srcDirs)
+    project.extensions.getByType<ArchitectPluginExtension>().platformSetupLoomIde()
+    loom.runs {
+        remove(findByName("server"))
+
+        maybeCreate("client").apply {
+            client()
+            name = "Minecraft Client"
+            isIdeConfigGenerated = true
+            val baseArgs = "-XX:+UnlockExperimentalVMOptions -XX:+UnlockDiagnosticVMOptions -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:+UseNUMA -XX:NmethodSweepActivity=1 -XX:ReservedCodeCacheSize=400M -XX:NonNMethodCodeHeapSize=12M -XX:ProfiledCodeHeapSize=194M -XX:NonProfiledCodeHeapSize=194M -XX:-DontCompileHugeMethods -XX:MaxNodeLimit=240000 -XX:NodeLimitFudgeFactor=8000 -XX:+UseVectorCmov -XX:+PerfDisableSharedMem -XX:+UseFastUnorderedTimeStamps -XX:+UseCriticalJavaThreadPriority -XX:ThreadPriorityPolicy=1 -XX:AllocatePrefetchStyle=3"
+            val memoryArgs = "-Xmx4G -Xms4G"
+            val gcArgs = "-XX:+UseShenandoahGC -XX:ShenandoahGCMode=iu -XX:ShenandoahGuaranteedGCInterval=1000000 -XX:AllocatePrefetchStyle=1"
+            vmArgs("$baseArgs $memoryArgs $gcArgs".split(" "))
+        }
+    }
+
+    val nameLowercase = name.lowercase()
+    @Suppress("DEPRECATION")
+    val nameCapitalized = name.capitalize()
+
+    configurations {
+        val common = register("common").get()
+        register("shadowCommon")
+        compileClasspath.get().extendsFrom(common)
+        runtimeClasspath.get().extendsFrom(common)
+
+        val development = register("development$nameCapitalized").get()
+        development.extendsFrom(common)
+    }
+
+    dependencies {
+        ("common"(project("path" to ":common", "configuration" to "namedElements")) as ModuleDependency).isTransitive = false
+        ("shadowCommon"(project("path" to ":common", "configuration" to "transformProduction$nameCapitalized")) as ModuleDependency).isTransitive = false
+    }
+
+    tasks.shadowJar {
+        exclude("architectury.common.json")
+        exclude("**/PlatformMethods.class")
+        configurations = (listOf(project.configurations.getByName("shadowCommon"), project.configurations.getByName("shade")))
+        archiveClassifier = "shadow-$nameLowercase-dev"
+        destinationDirectory = file("build/devlibs")
+        relocate("dev.rdh.f3", "dev.rdh.f3.$nameLowercase")
+    }
+
+    tasks.named("remapJar", RemapJarTask::class.java) {
+        inputFile = tasks.shadowJar.get().archiveFile
+        dependsOn(tasks.shadowJar)
+        archiveClassifier = nameLowercase
+    }
+
+    tasks.named("jar", Jar::class.java) {
+        archiveClassifier = "dev-$nameLowercase"
+    }
+
+    components["java"].apply {
+        (this as AdhocComponentWithVariants)
+                .withVariantsFromConfiguration(configurations.shadowRuntimeElements.get(), ConfigurationVariantDetails::skip)
+    }
+    //endregion
 }
 
 tasks.shadowJar {

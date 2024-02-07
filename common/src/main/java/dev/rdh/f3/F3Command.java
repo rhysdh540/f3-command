@@ -3,7 +3,6 @@ package dev.rdh.f3;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
