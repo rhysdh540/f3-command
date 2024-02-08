@@ -3,6 +3,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.task.RemapJarTask
+import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.jvm.tasks.Jar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -17,11 +18,6 @@ plugins {
     id("architectury-plugin") version("3.4.151") apply(false)
     id("dev.architectury.loom") version("1.4.380") apply(false)
     id("com.github.johnrengelman.shadow") version("8.1.1")
-}
-
-operator fun String.invoke(): String {
-    return rootProject.ext[this] as? String
-            ?: throw IllegalStateException("Property $this is not defined")
 }
 
 setup()
@@ -84,18 +80,16 @@ subprojects {
     apply(plugin = "com.github.johnrengelman.shadow")
     apply(plugin = "dev.architectury.loom")
 
-    configurations.register("shade")
-
     val loom = extensions.getByType<LoomGradleExtensionAPI>()
     loom.silentMojangMappingsLicense()
 
+    @Suppress("UnstableApiUsage")
     dependencies {
         "minecraft"("com.mojang:minecraft:${"minecraft_version"()}")
-        @Suppress("UnstableApiUsage")
         "mappings"(loom.layered {
             mappings("org.quiltmc:quilt-mappings:${"minecraft_version"()}+build.${"quilt_mappings_version"()}:intermediary-v2")
-            parchment("org.parchmentmc.data:parchment-${"parchment_minecraft_version"()}:${"parchment_version"()}@zip")
             officialMojangMappings { nameSyntheticMembers = false }
+            parchment("org.parchmentmc.data:parchment-${"parchment_minecraft_version"()}:${"parchment_version"()}@zip")
         })
     }
 
@@ -134,46 +128,45 @@ subprojects {
     }
 
     val nameLowercase = name.lowercase()
-    @Suppress("DEPRECATION")
-    val nameCapitalized = name.capitalize()
+    val nameCapitalized = name.capitalized()
 
+    val common: Configuration by configurations.creating
+    val shadowCommon: Configuration by configurations.creating
     configurations {
-        val common = register("common").get()
-        register("shadowCommon")
         compileClasspath.get().extendsFrom(common)
         runtimeClasspath.get().extendsFrom(common)
-
         val development = register("development$nameCapitalized").get()
         development.extendsFrom(common)
     }
 
     dependencies {
-        ("common"(project("path" to ":common", "configuration" to "namedElements")) as ModuleDependency).isTransitive = false
-        ("shadowCommon"(project("path" to ":common", "configuration" to "transformProduction$nameCapitalized")) as ModuleDependency).isTransitive = false
+        (common(project("path" to ":common", "configuration" to "namedElements")) as ModuleDependency).isTransitive = false
+        (shadowCommon(project("path" to ":common", "configuration" to "transformProduction$nameCapitalized")) as ModuleDependency).isTransitive = false
     }
 
     tasks.shadowJar {
         exclude("architectury.common.json")
         exclude("**/PlatformMethods.class")
-        configurations = (listOf(project.configurations.getByName("shadowCommon"), project.configurations.getByName("shade")))
+        configurations = (listOf(shadowCommon))
         archiveClassifier = "shadow-$nameLowercase-dev"
-        destinationDirectory = file("build/devlibs")
+        destinationDirectory = layout.buildDirectory.dir("devlibs")
         relocate("dev.rdh.f3", "dev.rdh.f3.$nameLowercase")
     }
 
-    tasks.named("remapJar", RemapJarTask::class.java) {
+    tasks.named<RemapJarTask>("remapJar") {
         inputFile = tasks.shadowJar.get().archiveFile
         dependsOn(tasks.shadowJar)
         archiveClassifier = nameLowercase
     }
 
-    tasks.named("jar", Jar::class.java) {
+    tasks.named<Jar>("jar") {
         archiveClassifier = "dev-$nameLowercase"
     }
 
-    components["java"].apply {
-        (this as AdhocComponentWithVariants)
-                .withVariantsFromConfiguration(configurations.shadowRuntimeElements.get(), ConfigurationVariantDetails::skip)
+    components.getByName<AdhocComponentWithVariants>("java") {
+        withVariantsFromConfiguration(configurations["shadowRuntimeElements"]) {
+            skip()
+        }
     }
     //endregion
 }
@@ -234,7 +227,7 @@ tasks.shadowJar {
 }
 
 tasks.assemble {
-    dependsOn("shadowJar")
+    dependsOn(tasks.shadowJar)
 }
 
 fun setup() {
@@ -260,4 +253,9 @@ fun setup() {
             }
         }
     }
+}
+
+operator fun String.invoke(): String {
+    return rootProject.ext[this] as? String
+            ?: throw IllegalStateException("Property $this is not defined")
 }

@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
-license = "GPL-3.0"
+license = "GPL-3.0-or-later"
 issueTrackerURL = "https://github.com/rhysdh540/f3-command/issues"
 
 [[mods]]

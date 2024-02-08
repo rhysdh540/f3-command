@@ -9,7 +9,7 @@
     "sources": "https://github.com/rhysdh540/f3-command",
     "issues": "https://github.com/rhysdh540/f3-command/issues"
   },
-  "license": "GNU GPL 3.0",
+  "license": "GPL-3.0-or-later",
   "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
