@@ -10,7 +10,7 @@ displayName = "F3 Command"
 logoFile = "icon.png"
 authors = "rdh"
 description = '''
-F3 but it's a command
+Adds a command to emulate pressing the F3 keybinds
 '''
 
 [[dependencies.f3]]

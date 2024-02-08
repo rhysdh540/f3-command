@@ -3,7 +3,7 @@
   "id": "f3",
   "version": "${version}",
   "name": "F3 Command",
-  "description": "F3 but it's a command",
+  "description": "Adds a command to emulate pressing the F3 keybinds",
   "authors": ["rdh"],
   "contact": {
     "sources": "https://github.com/rhysdh540/f3-command",
