@@ -1,15 +1,13 @@
-package dev.rdh.f3.forge;
+package dev.rdh.f3.fabric;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 
 import dev.rdh.f3.Abstractions;
 import dev.rdh.f3.F3Command;
 
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
@@ -18,30 +16,23 @@ import net.minecraft.network.chat.Component;
 
 import java.nio.file.Path;
 
-@Mod(F3Command.ID)
-@SuppressWarnings("UnstableApiUsage")
-public class ModernF3 implements Abstractions {
+public class ModernFabricF3 implements ClientModInitializer, Abstractions {
 	private static final Minecraft mc = Minecraft.getInstance();
-	public ModernF3() {
-		MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
-	}
 
-	@SubscribeEvent
-	void onCommandRegister(RegisterClientCommandsEvent event) {
-		F3Command.register(event.getDispatcher(), this);
+	@Override
+	public void onInitializeClient() {
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> F3Command.register(dispatcher, this));
 	}
 
 	@Override
 	public String platform() {
-		return "Forge";
+		return FabricLoader.getInstance().isModLoaded("quilt_loader") ? "Quilt" : "Fabric";
 	}
 
 	@Override
 	public String minecraftVersion() {
-		return LoadingModList.get().getMods().stream()
-				.filter(mod -> mod.getModId().equals("minecraft"))
-				.findFirst()
-				.map(mod -> mod.getVersion().toString())
+		return FabricLoader.getInstance().getModContainer("minecraft")
+				.map(container -> container.getMetadata().getVersion().getFriendlyString())
 				.orElseThrow(() -> new IllegalStateException("Minecraft mod not found"));
 	}
 

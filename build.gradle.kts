@@ -41,7 +41,6 @@ subprojects {
     apply(plugin = "xyz.wagyourtail.unimined")
 
     repositories {
-        mavenCentral()
         maven("https://maven.parchmentmc.org")
         maven("https://mcentral.firstdark.dev/releases")
     }
@@ -57,6 +56,7 @@ subprojects {
                 runtimeClasspath += rootOutput
 
                 unimined.minecraft(this, true) {
+                    combineWith(rootProject.sourceSets["main"])
                     runs.config("server") {
                         disabled = true
                     }

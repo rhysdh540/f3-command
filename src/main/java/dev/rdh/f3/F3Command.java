@@ -5,12 +5,20 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class F3Command {
 	public static final String ID = "f3";
 	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 
+	private static final AtomicBoolean registered = new AtomicBoolean(false);
+
 	public static void register(CommandDispatcher dispatcher, Abstractions abstractions) {
+		if(registered.get()) {
+			return;
+		}
+		registered.set(true);
 		LOGGER.info("Registering F3 command for {} on minecraft {}",
 				abstractions.platform(), abstractions.minecraftVersion());
 
