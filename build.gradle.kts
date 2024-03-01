@@ -3,6 +3,7 @@ import groovy.json.JsonSlurper
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
+import xyz.wagyourtail.unimined.api.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -37,6 +38,7 @@ repositories {
 }
 
 subprojects {
+    if(this == project(":bootstrap")) return@subprojects
     apply(plugin = "com.github.johnrengelman.shadow")
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -62,6 +64,21 @@ subprojects {
                     }
                 }
             }
+
+            configurations.create(it)
+            artifacts.add(it, tasks.named("${it}Jar"))
+        }
+    }
+
+    tasks.shadowJar {
+        archiveClassifier = project.name
+
+        val remapTasks = tasks.withType<RemapJarTask>().matching {
+            it.group == "unimined" && it.name.matches(Regex("remap.*Jar"))
+        }
+        remapTasks.forEach {
+            from(it)
+            dependsOn(it)
         }
     }
 }
@@ -72,15 +89,21 @@ dependencies {
 }
 
 tasks.shadowJar {
-//    subprojects.forEach {
-//        if(it != project(":common")) {
-//            this.from(it.tasks.named("remapJar"))
-//        }
-//    }
+    subprojects.forEach { p ->
+        if(p == project(":bootstrap")) return@forEach
 
-    archiveBaseName.set("archives_base_name"())
-    archiveClassifier.set("")
-    archiveVersion.set("modVersion"())
+        val shadow = p.tasks.shadowJar.get()
+        from(shadow) {
+            exclude { !it.path.startsWith("dev.rdh.f3") }
+        }
+        dependsOn(shadow)
+    }
+
+    from(project(":bootstrap").tasks.jar.get())
+
+    archiveBaseName = "archives_base_name"()
+    archiveClassifier = ""
+    archiveVersion = "modVersion"()
 
     doLast {
         val jar = archiveFile.get().asFile

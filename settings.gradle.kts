@@ -9,3 +9,4 @@ pluginManagement {
 rootProject.name = "F3 Command"
 
 include("modern", "lessModern")
+include("bootstrap")
