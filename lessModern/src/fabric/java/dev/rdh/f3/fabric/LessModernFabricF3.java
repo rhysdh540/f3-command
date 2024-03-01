@@ -11,7 +11,6 @@ import dev.rdh.f3.F3Command;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 import java.nio.file.Path;
@@ -53,7 +52,7 @@ public class LessModernFabricF3 implements ClientModInitializer, Abstractions {
 
 	@Override
 	public void toggleNetwork() {
-		//i dont think it exists on this version
+		sendMessage("Network graph not supported in versions before 1.20.2.");
 	}
 
 	@Override
@@ -102,6 +101,17 @@ public class LessModernFabricF3 implements ClientModInitializer, Abstractions {
 
 	@Override
 	public void dumpTextures() {
+		int[] version = parsedMcVersion();
+		if(version[0] > 18) {
+			if(version[0] != 19 || version[1] >= 4) {
+				actuallyDumpTextures();
+				return;
+			}
+		}
+		sendMessage("Dumping textures not supported in versions before 1.19.4-pre3.");
+	}
+
+	private void actuallyDumpTextures() {
 		Path gameDir = mc.gameDirectory.toPath().toAbsolutePath();
 		Path outputDir = TextureUtil.getDebugTexturePath(gameDir);
 		mc.getTextureManager().dumpAllSheets(outputDir);
@@ -112,7 +122,10 @@ public class LessModernFabricF3 implements ClientModInitializer, Abstractions {
 	}
 
 	private static void sendMessage(String message, Object... args) {
-		mc.gui.getChat().addMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
-				.append(CommonComponents.SPACE).append(Component.translatable(message, args)));
+		mc.gui.getChat().addMessage(Component.empty()
+				.append(Component.translatable("debug.prefix")
+								.withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+				.append(Component.literal(" "))
+				.append(Component.translatable(message, args)));
 	}
 }

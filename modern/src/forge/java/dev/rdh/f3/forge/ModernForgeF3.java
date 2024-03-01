@@ -27,7 +27,7 @@ public class ModernForgeF3 implements Abstractions {
 		MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
 	}
 
-	@SubscribeEvent
+//	@SubscribeEvent
 	void onCommandRegister(RegisterClientCommandsEvent event) {
 		F3Command.register(event.getDispatcher(), this);
 	}

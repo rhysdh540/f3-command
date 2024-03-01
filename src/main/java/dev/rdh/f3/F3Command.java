@@ -15,13 +15,10 @@ public final class F3Command {
 	private static final AtomicBoolean registered = new AtomicBoolean(false);
 
 	public static void register(CommandDispatcher dispatcher, Abstractions abstractions) {
-		if(registered.get()) {
-			return;
+		if(!registered.getAndSet(true)) {
+			LOGGER.info("Registering F3 command for {} on minecraft {}",
+					abstractions.platform(), abstractions.minecraftVersion());
 		}
-		registered.set(true);
-		LOGGER.info("Registering F3 command for {} on minecraft {}",
-				abstractions.platform(), abstractions.minecraftVersion());
-
 
 		LiteralArgumentBuilder f3 = (LiteralArgumentBuilder) literal(ID)
 				.executes(context -> {

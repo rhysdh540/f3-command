@@ -1,14 +1,15 @@
 package dev.rdh.f3.bootstrap;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
+import dev.rdh.f3.F3Command;
 
-public class F3FabricBootstrap implements ClientModInitializer {
-	@Override
-	public void onInitializeClient() {
-		String mcVer = FabricLoader.getInstance().getModContainer("minecraft")
-				.map(container -> container.getMetadata().getVersion().getFriendlyString())
-				.orElseThrow(() -> new IllegalStateException("Minecraft mod not found"));
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
+
+@Mod(F3Command.ID)
+public class F3ForgeBootstrap {
+	public F3ForgeBootstrap() {
+		String mcVer = FMLLoader.versionInfo().mcVersion();
+
 		String[] mcVers = mcVer.split("\\.");
 		if(mcVers.length == 2) {
 			mcVers = new String[]{ mcVers[0], mcVers[1], "0" };
@@ -23,12 +24,12 @@ public class F3FabricBootstrap implements ClientModInitializer {
 
 		if(major >= 20) {
 			if(minor < 2) {
-				init("dev.rdh.f3.fabric.ModernFabricF3");
+				init("dev.rdh.f3.fabric.ModernForgeF3");
 			} else {
-				init("dev.rdh.f3.fabric.LessModernFabricF3");
+				init("dev.rdh.f3.fabric.LessModernForgeF3");
 			}
 		} else if(major >= 18) {
-			init("dev.rdh.f3.fabric.LessModernFabricF3");
+			init("dev.rdh.f3.fabric.LessModernForgeF3");
 		}
 
 		else throw new IllegalStateException("Minecraft version " + mcVer + " not supported yet");
@@ -37,7 +38,7 @@ public class F3FabricBootstrap implements ClientModInitializer {
 	private void init(String className) {
 		try {
 			Class<?> cls = Class.forName(className);
-			cls.getDeclaredMethod("onInitializeClient").invoke(cls.getConstructor().newInstance());
+			cls.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			throw new IllegalStateException("Failed to initialize modern F3", e);
 		}

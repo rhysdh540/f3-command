@@ -38,7 +38,7 @@ repositories {
 }
 
 subprojects {
-    if(this == project(":bootstrap")) return@subprojects
+    if(!this.isMinecraftSubproject()) return@subprojects
     apply(plugin = "com.github.johnrengelman.shadow")
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -64,9 +64,6 @@ subprojects {
                     }
                 }
             }
-
-            configurations.create(it)
-            artifacts.add(it, tasks.named("${it}Jar"))
         }
     }
 
@@ -90,7 +87,7 @@ dependencies {
 
 tasks.shadowJar {
     subprojects.forEach { p ->
-        if(p == project(":bootstrap")) return@forEach
+        if(!p.isMinecraftSubproject()) return@forEach
 
         val shadow = p.tasks.shadowJar.get()
         from(shadow) {
@@ -180,4 +177,11 @@ fun setup() {
 operator fun String.invoke(): String {
     return rootProject.ext[this] as? String
             ?: throw IllegalStateException("Property $this is not defined")
+}
+
+
+fun Project.isMinecraftSubproject(): Boolean {
+    return !arrayOf(
+            rootProject, project(":bootstrap"), project(":stub")
+    ).contains(this)
 }

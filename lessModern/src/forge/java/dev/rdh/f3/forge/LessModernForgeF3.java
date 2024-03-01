@@ -14,7 +14,6 @@ import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 import java.nio.file.Path;
@@ -23,7 +22,7 @@ import java.nio.file.Path;
 public class LessModernForgeF3 implements Abstractions {
 	private static final Minecraft mc = Minecraft.getInstance();
 	public LessModernForgeF3() {
-		MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 
 	@SubscribeEvent
@@ -41,8 +40,8 @@ public class LessModernForgeF3 implements Abstractions {
 		return LoadingModList.get().getMods().stream()
 				.filter(mod -> mod.getModId().equals("minecraft"))
 				.findFirst()
-				.map(mod -> mod.getVersion().toString())
-				.orElseThrow(() -> new IllegalStateException("Minecraft mod not found"));
+				.orElseThrow(() -> new IllegalStateException("Minecraft mod not found"))
+				.getVersion().toString();
 	}
 
 	@Override
@@ -62,7 +61,7 @@ public class LessModernForgeF3 implements Abstractions {
 
 	@Override
 	public void toggleNetwork() {
-		//i dont think it exists on this version
+		//added in 1.20.2
 	}
 
 	@Override
@@ -111,6 +110,16 @@ public class LessModernForgeF3 implements Abstractions {
 
 	@Override
 	public void dumpTextures() {
+		//texture dump was added in 1.19.4-pre3
+		String[] mcVer = minecraftVersion().split("\\.");
+		int major = Integer.parseInt(mcVer[1]);
+		if(major <= 18) return;
+		int minor = Integer.parseInt(mcVer[2]);
+		if(major == 19 && minor < 4) return;
+		actuallyDumpTextures();
+	}
+
+	private void actuallyDumpTextures() {
 		Path gameDir = mc.gameDirectory.toPath().toAbsolutePath();
 		Path outputDir = TextureUtil.getDebugTexturePath(gameDir);
 		mc.getTextureManager().dumpAllSheets(outputDir);
@@ -121,7 +130,10 @@ public class LessModernForgeF3 implements Abstractions {
 	}
 
 	private static void sendMessage(String message, Object... args) {
-		mc.gui.getChat().addMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
-				.append(CommonComponents.SPACE).append(Component.translatable(message, args)));
+		mc.gui.getChat().addMessage(Component.empty()
+				.append(Component.translatable("debug.prefix")
+						.withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+				.append(Component.literal(" "))
+				.append(Component.translatable(message, args)));
 	}
 }

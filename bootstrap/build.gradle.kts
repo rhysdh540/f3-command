@@ -3,20 +3,11 @@ repositories {
 }
 
 dependencies {
+    // there's too many classes involved with getting the minecraft version on fabric to just include it in stub
+    // so just depend on the whole thing
     compileOnly("net.fabricmc:fabric-loader:${rootProject.ext["fabric_version"]}")
     compileOnly(rootProject)
-}
-
-val thisProject = project
-rootProject.subprojects.forEach {
-    if (it != thisProject) {
-        sourceSets.forEach a@ { s ->
-            if(s.name == "main" || s.name == "test") return@a
-            thisProject.dependencies {
-                compileOnly(files(s.java.srcDirs))
-            }
-        }
-    }
+    compileOnly(project(":stub"))
 }
 
 tasks.processResources {
