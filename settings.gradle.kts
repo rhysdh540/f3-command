@@ -8,4 +8,4 @@ pluginManagement {
 
 rootProject.name = "F3 Command"
 
-include("modern")
+include("modern", "lessModern")

@@ -1,13 +1,14 @@
-// for 1.20.2+
+// for 1.18.2-1.20.1
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
+import xyz.wagyourtail.unimined.api.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
+import xyz.wagyourtail.unimined.util.capitalized
 
-val minecraftVersion = "1.20.4"
-val forgeVersion = "49.0.27"
-val neoVersion = "153-beta"
-val parchmentVersion = "2023.12.31"
-val parchmentMcVersion = "1.20.3"
-val fabricApiVersion = "0.93.1"
+val minecraftVersion = "1.20.1"
+val forgeVersion = "47.2.19"
+val parchmentVersion = "2023.09.03"
+val parchmentMcVersion = "1.20.1"
+val fabricApiVersion = "0.92.0"
 
 sourceSets {
     maybeCreate("forge").apply {
@@ -15,14 +16,6 @@ sourceSets {
             setup()
             minecraftForge {
                 loader(forgeVersion)
-            }
-        }
-    }
-    maybeCreate("neoforge").apply {
-        unimined.minecraft(this) {
-            setup()
-            neoForged {
-                loader(neoVersion)
             }
         }
     }
