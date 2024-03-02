@@ -93,7 +93,9 @@ tasks.shadowJar {
 
         it.tasks.shadowJar.get().also {
             println("Adding $it to $this")
-            from(it)
+            from(zipTree(it.archiveFile.get())) {
+                include { it.isDirectory || it.name.endsWith(".class") }
+            }
             dependsOn(it)
         }
     }

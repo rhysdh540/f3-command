@@ -1,6 +1,11 @@
 package dev.rdh.f3.bootstrap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public interface Bootstrap {
+	Logger log = LoggerFactory.getLogger(Bootstrap.class);
+
 	static void bootstrap(Bootstrap b) {
 		String mcVer = b.getMinecraftVersion();
 
@@ -17,21 +22,28 @@ public interface Bootstrap {
 		int minor = Integer.parseInt(mcVers[2]);
 
 		if(major >= 20) {
-			if(minor < 2) {
-				b.init(b.modernF3());
+			if(minor >= 2) {
+				b.initWithMessage(b.modern());
 			} else {
-				b.init(b.lessModernF3());
+				b.initWithMessage(b.lessModern());
 			}
 		} else if(major >= 18) {
-			b.init(b.lessModernF3());
+			b.initWithMessage(b.lessModern());
 		}
 
 		else throw new IllegalStateException("Minecraft version " + mcVer + " not supported yet");
 	}
 
+	default void initWithMessage(String className) {
+		log.info("Initializing F3 for {} on mc{} with class {}", platform(), getMinecraftVersion(), className);
+		init(className);
+	}
+
+	String platform();
+
 	void init(String className);
 	String getMinecraftVersion();
 
-	String modernF3();
-	String lessModernF3();
+	String modern();
+	String lessModern();
 }

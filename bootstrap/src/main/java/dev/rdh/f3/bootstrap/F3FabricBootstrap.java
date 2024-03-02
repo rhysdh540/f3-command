@@ -10,6 +10,11 @@ public class F3FabricBootstrap implements ClientModInitializer, Bootstrap {
 	}
 
 	@Override
+	public String platform() {
+		return FabricLoader.getInstance().isModLoaded("quilt_loader") ? "Quilt" : "Fabric";
+	}
+
+	@Override
 	public void init(String className) {
 		try {
 			Class<?> cls = Class.forName(className);
@@ -27,12 +32,12 @@ public class F3FabricBootstrap implements ClientModInitializer, Bootstrap {
 	}
 
 	@Override
-	public String modernF3() {
+	public String modern() {
 		return "dev.rdh.f3.fabric.ModernFabricF3";
 	}
 
 	@Override
-	public String lessModernF3() {
+	public String lessModern() {
 		return "dev.rdh.f3.fabric.LessModernFabricF3";
 	}
 }

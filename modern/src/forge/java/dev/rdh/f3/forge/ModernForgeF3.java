@@ -9,7 +9,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.LoadingModList;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -20,14 +20,13 @@ import net.minecraft.network.chat.Component;
 import java.nio.file.Path;
 
 @Mod(F3Command.ID)
-@SuppressWarnings("UnstableApiUsage")
 public class ModernForgeF3 implements Abstractions {
 	private static final Minecraft mc = Minecraft.getInstance();
 	public ModernForgeF3() {
 		MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
 	}
 
-//	@SubscribeEvent
+	@SubscribeEvent
 	void onCommandRegister(RegisterClientCommandsEvent event) {
 		F3Command.register(event.getDispatcher(), this);
 	}
@@ -39,11 +38,7 @@ public class ModernForgeF3 implements Abstractions {
 
 	@Override
 	public String minecraftVersion() {
-		return LoadingModList.get().getMods().stream()
-				.filter(mod -> mod.getModId().equals("minecraft"))
-				.findFirst()
-				.map(mod -> mod.getVersion().toString())
-				.orElseThrow(() -> new IllegalStateException("Minecraft mod not found"));
+		return FMLLoader.versionInfo().mcVersion();
 	}
 
 	@Override

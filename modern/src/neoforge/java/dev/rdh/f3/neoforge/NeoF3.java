@@ -3,7 +3,7 @@ package dev.rdh.f3.neoforge;
 import com.mojang.blaze3d.platform.TextureUtil;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -22,6 +22,9 @@ import java.nio.file.Path;
 public class NeoF3 implements Abstractions {
 	private static final Minecraft mc = Minecraft.getInstance();
 	public NeoF3() {
+		// Neo isn't bootstrapped, so log the initialization here
+		F3Command.LOGGER.info("Initializing F3 for {} on mc{} with class {}",
+				platform(), minecraftVersion(), getClass().getName());
 		NeoForge.EVENT_BUS.addListener(this::onCommandRegister);
 	}
 
@@ -37,11 +40,7 @@ public class NeoF3 implements Abstractions {
 
 	@Override
 	public String minecraftVersion() {
-		return LoadingModList.get().getMods().stream()
-				.filter(mod -> mod.getModId().equals("minecraft"))
-				.findFirst()
-				.map(mod -> mod.getVersion().toString())
-				.orElseThrow(() -> new IllegalStateException("Minecraft mod not found"));
+		return FMLLoader.versionInfo().mcVersion();
 	}
 
 	@Override

@@ -12,6 +12,11 @@ public class F3ForgeBootstrap implements Bootstrap {
 	}
 
 	@Override
+	public String platform() {
+		return "Forge";
+	}
+
+	@Override
 	 public void init(String className) {
 		try {
 			Class<?> cls = Class.forName(className);
@@ -27,12 +32,12 @@ public class F3ForgeBootstrap implements Bootstrap {
 	}
 
 	@Override
-	public String modernF3() {
+	public String modern() {
 		return "dev.rdh.f3.forge.ModernForgeF3";
 	}
 
 	@Override
-	public String lessModernF3() {
+	public String lessModern() {
 		return "dev.rdh.f3.forge.LessModernForgeF3";
 	}
 }

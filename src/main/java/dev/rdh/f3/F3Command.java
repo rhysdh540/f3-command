@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked", "rawtypes"}) // jank everything because we can't access the command sources
 public final class F3Command {
 	public static final String ID = "f3";
 	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
@@ -16,8 +16,8 @@ public final class F3Command {
 
 	public static void register(CommandDispatcher dispatcher, Abstractions abstractions) {
 		if(!registered.getAndSet(true)) {
-			LOGGER.info("Registering F3 command for {} on minecraft {}",
-					abstractions.platform(), abstractions.minecraftVersion());
+			// for some reason this is called multiple times on forge, only log once
+			LOGGER.info("Registering F3 command");
 		}
 
 		LiteralArgumentBuilder f3 = (LiteralArgumentBuilder) literal(ID)
