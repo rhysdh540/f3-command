@@ -40,7 +40,7 @@ allprojects {
 }
 
 repositories {
-    maven("https://libraries.minecraft.net")
+    maven("https://maven.fabricmc.net")
 }
 
 subprojects {
@@ -53,7 +53,7 @@ subprojects {
         maven("https://mcentral.firstdark.dev/releases")
     }
 
-    val rootOutput = rootProject.sourceSets["main"].output
+    val rootOutput = project(":brigadier").sourceSets["main"].output
 
     sourceSets {
         project.file("src").list()?.forEach {
@@ -64,7 +64,7 @@ subprojects {
                 runtimeClasspath += rootOutput
 
                 unimined.minecraft(this, true) {
-                    combineWith(rootProject.sourceSets["main"])
+                    combineWith(project(":brigadier").sourceSets["main"])
                     runs.config("server") {
                         disabled = true
                     }
@@ -87,8 +87,20 @@ subprojects {
 }
 
 dependencies {
-    compileOnly("com.mojang:brigadier:1.0.18")
+    // there's too many classes involved with getting the minecraft version on fabric to just include it in stub
+    // so just depend on the whole thing
+    compileOnly("net.fabricmc:fabric-loader:${"fabric_version"()}")
     compileOnly("org.slf4j:slf4j-api:2.0.9")
+    compileOnly(project(":stub"))
+    compileOnly(project(":brigadier"))
+}
+
+tasks.processResources {
+    outputs.upToDateWhen{false}
+    inputs.property("version", rootProject.version)
+    filesMatching(listOf("META-INF/mods.toml", "fabric.mod.json")) {
+        expand("version" to rootProject.version)
+    }
 }
 
 tasks.shadowJar {
@@ -104,7 +116,7 @@ tasks.shadowJar {
         }
     }
 
-    project(":bootstrap").tasks.jar.get().also {
+    project(":brigadier").tasks.jar.get().also {
         from(it)
         dependsOn(it)
     }
@@ -198,6 +210,6 @@ operator fun String.invoke(): String {
 
 fun Project.isMinecraftSubproject(): Boolean {
     return (this in arrayOf(
-            rootProject, project(":bootstrap"), project(":stub")
+            rootProject, project(":brigadier"), project(":stub")
     )).not()
 }
