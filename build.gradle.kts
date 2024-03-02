@@ -1,3 +1,5 @@
+@file:Suppress("NestedLambdaShadowedImplicitParameter")
+
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.objectweb.asm.ClassReader
@@ -86,17 +88,20 @@ dependencies {
 }
 
 tasks.shadowJar {
-    subprojects.forEach { p ->
-        if(!p.isMinecraftSubproject()) return@forEach
+    subprojects.forEach {
+        if(!it.isMinecraftSubproject()) return@forEach
 
-        val shadow = p.tasks.shadowJar.get()
-        from(shadow) {
-            exclude { !it.path.startsWith("dev.rdh.f3") }
+        it.tasks.shadowJar.get().also {
+            println("Adding $it to $this")
+            from(it)
+            dependsOn(it)
         }
-        dependsOn(shadow)
     }
 
-    from(project(":bootstrap").tasks.jar.get())
+    project(":bootstrap").tasks.jar.get().also {
+        from(it)
+        dependsOn(it)
+    }
 
     archiveBaseName = "archives_base_name"()
     archiveClassifier = ""
@@ -129,6 +134,11 @@ tasks.shadowJar {
                     node.methods.forEach { method ->
                         method.localVariables?.clear()
                         method.parameters?.clear()
+                    }
+
+                    // Remove @Mod annotation from forge impls except for the bootstrap
+                    if(!name.equals("dev/rdh/f3/bootstrap/F3ForgeBootstrap.class", false)) {
+                        node.visibleAnnotations?.removeIf { it.desc == "Lnet/minecraftforge/fml/common/Mod;" }
                     }
 
                     val writer = ClassWriter(0)
@@ -181,7 +191,7 @@ operator fun String.invoke(): String {
 
 
 fun Project.isMinecraftSubproject(): Boolean {
-    return !arrayOf(
+    return (this in arrayOf(
             rootProject, project(":bootstrap"), project(":stub")
-    ).contains(this)
+    )).not()
 }
