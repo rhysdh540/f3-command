@@ -32,7 +32,11 @@ allprojects {
         options.release = 17
     }
 
-    repositories.mavenCentral()
+    repositories.mavenCentral {
+        content {
+            excludeGroup("ca.weblite")
+        }
+    }
 }
 
 repositories {

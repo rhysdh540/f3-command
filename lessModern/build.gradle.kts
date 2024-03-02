@@ -1,8 +1,6 @@
-// for 1.18.2-1.20.1
+// for 1.19.0-1.20.1
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
-import xyz.wagyourtail.unimined.api.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
-import xyz.wagyourtail.unimined.util.capitalized
 
 val minecraftVersion = "1.20.1"
 val forgeVersion = "47.2.19"
